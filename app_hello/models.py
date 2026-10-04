@@ -16,3 +16,27 @@ class Experience(models.Model):
     date_range = models.CharField(max_length=50,null=True)
     position = models.CharField(max_length=100,null=True)
     job_description = models.CharField(null=True,max_length=100)
+
+
+class Education(models.Model):
+    DEGREE_CHOICES = [
+        ('Diploma', 'High School Diploma'),
+        ('associate', 'Associate Degree'),
+        ('bachelor', "Bachelor's Degree"),
+        ('master', "Master's Degree"),
+        ('phd', 'PhD'),
+    ]
+        
+    User = models.ForeignKey(User,on_delete=models.CASCADE)
+    university = models.CharField(max_length=100,null=True)
+    location = models.CharField(max_length=50,null=True)
+    date_range = models.CharField(max_length=50,null=True)
+    degree = models.CharField(max_length=100,null=True,choices=DEGREE_CHOICES)
+    study_description = models.CharField(null=True,max_length=100)
+
+    @property
+    def pretified_degree(self):
+        return dict(self.DEGREE_CHOICES).get(self.degree)
+
+
+    

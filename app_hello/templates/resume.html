@@ -203,31 +203,22 @@ body {
       {% endfor %}
     </div>
     {% endif %}
+    <div class="section">
       <div class="section__title">Education</div>
       <div class="section__list">
-        <div class="section__list-item">
+        {% for edu in User.education.set_all %}
+         <div class="section__list-item">
           <div class="left">
-            <div class="name">Sample Institute of technology</div>
-            <div class="addr">San Fr, CA</div>
-            <div class="duration">Jan 2011 - Feb 2015</div>
+            <div class="name">{{edu.university}}</div>
+            <div class="addr">{{edu.location}}</div>
+            <div class="duration">{{edu.date_range}}</div>
           </div>
           <div class="right">
-            <div class="name">Fr developer</div>
-            <div class="desc">did This and that</div>
+            <div class="name">{{edu.pertified_degree}}</div>
+            <div class="desc">{{edu.study_description}}</div>
           </div>
         </div>
-        <div class="section__list-item">
-          <div class="left">
-            <div class="name">Akount</div>
-            <div class="addr">San Monica, CA</div>
-            <div class="duration">Jan 2011 - Feb 2015</div>
-          </div>
-          <div class="right">
-            <div class="name">Fr developer</div>
-            <div class="desc">did This and that</div>
-          </div>
-        </div>
-
+        {% endfor %}
       </div>
       
   </div>
