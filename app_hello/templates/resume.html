@@ -206,7 +206,7 @@ body {
     <div class="section">
       <div class="section__title">Education</div>
       <div class="section__list">
-        {% for edu in User.education.set_all %}
+        {% for edu in User.education_set.all %}
          <div class="section__list-item">
           <div class="left">
             <div class="name">{{edu.university}}</div>
@@ -222,78 +222,62 @@ body {
       </div>
       
   </div>
+  {% if user.project_set.exists %}
      <div class="section">
       <div class="section__title">Projects</div> 
        <div class="section__list">
+         {% for project in user.project_set.all %}
          <div class="section__list-item">
-           <div class="name">DSP</div>
-           <div class="text">I am a front-end developer with more than 3 years of experience writing html, css, and js. I'm motivated, result-focused and seeking a successful team-oriented company with opportunity to grow.</div>
+           <div class="name">{{project.title}}</div>
+           <div class="text">{{project.description}}</div>
          </div>
-         
-         <div class="section__list-item">
-                    <div class="name">DSP</div>
-           <div class="text">I am a front-end developer with more than 3 years of experience writing html, css, and js. I'm motivated, result-focused and seeking a successful team-oriented company with opportunity to grow. <a href="/login">link</a>
-           </div>
-         </div>
-       </div>
+      </div>
+      {% endfor %}
     </div>
+  </div>
+    {% endif %}
+
+    {% if user.skill_set.exists %}
      <div class="section">
        <div class="section__title">Skills</div>
        <div class="skills">
+        {% for skill in user.skill_set.all  %}
          <div class="skills__item">
            <div class="left"><div class="name">
-             Javascript
+             {{skill.title}}
              </div></div>
            <div class="right">
-                          <input  id="ck1" type="checkbox" checked/>
+                          <input  id="ck1" type="checkbox" {% if skill.level >= 1 %}checked{% endif %}/>
 
              <label for="ck1"></label>
-                          <input id="ck2" type="checkbox" checked/>
+                          <input id="ck2" type="checkbox" {% if skill.level >= 2 %}checked{% endif %}/>
 
               <label for="ck2"></label>
-                         <input id="ck3" type="checkbox" />
+                         <input id="ck3" type="checkbox" {% if skill.level >= 3 %}checked{% endif %}/>
 
               <label for="ck3"></label>
-                           <input id="ck4" type="checkbox" />
+                           <input id="ck4" type="checkbox" {% if skill.level >= 4 %}checked{% endif %}/>
             <label for="ck4"></label>
-                          <input id="ck5" type="checkbox" />
+                          <input id="ck5" type="checkbox" {% if skill.level == 5 %}checked{% endif %}/>
               <label for="ck5"></label>
 
            </div>
          </div>
-         
-       </div>
-       <div class="skills__item">
-           <div class="left"><div class="name">
-             CSS</div></div>
-           <div class="right">
-                          <input  id="ck1" type="checkbox" checked/>
-
-             <label for="ck1"></label>
-                          <input id="ck2" type="checkbox" checked/>
-
-              <label for="ck2"></label>
-                         <input id="ck3" type="checkbox" />
-
-              <label for="ck3"></label>
-                           <input id="ck4" type="checkbox" />
-            <label for="ck4"></label>
-                          <input id="ck5" type="checkbox" />
-              <label for="ck5"></label>
-
-           </div>
-         </div>
-         
-       </div>
+         {% endfor %} 
+       </div>        
+    </div>
+    {% endif %}
      <div class="section">
+      {% if user.profile.intrests %}
      <div class="section__title">
        Interests
        </div>
        <div class="section__list">
          <div class="section__list-item">
-                  Football, programming.
+               {{user.profile.intrests}}   
           </div>
        </div>
+       {% endif %}
      </div>
      </div>
   </div>

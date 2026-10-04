@@ -7,6 +7,7 @@ class Profile(models.Model):
     phone = models.CharField(max_length=50,null=True)
     job_title = models.CharField(max_length=50,null=True)
     description = models.TextField(null=True)
+    intrests = models.TextField(null=True)
 
 
 class Experience(models.Model):
@@ -37,6 +38,28 @@ class Education(models.Model):
     @property
     def pretified_degree(self):
         return dict(self.DEGREE_CHOICES).get(self.degree)
+
+
+class Project(models.Model):
+    user = models.ForeignKey(User , on_delete=models.CASCADE,null=True)
+    title = models.CharField(max_length=50,null=True)
+    description = models.TextField(null=True)
+
+
+class Skill(models.Model):
+    LEVEL_CHOICES = (
+        (1,1),
+        (2,2),
+        (3,3),
+        (4,4),
+        (5,5),
+    )
+    user = models.ForeignKey(User , on_delete=models.CASCADE,null=True)
+    title = models.CharField(max_length=50,null=True)
+    level = models.PositiveSmallIntegerField(choices=LEVEL_CHOICES ,null=True,default=LEVEL_CHOICES[0])
+
+
+
 
 
     
