@@ -19,6 +19,10 @@ class Command(BaseCommand):
     help = "Create 50 fake users with complete resume data"
 
     def handle(self, *args, **options):
+        choice = input("Are you sure you want to seed data? it delete all users!(Y/n)")
+        if choice == "Y":
+            User.objects.all().delete()
+
         fake = Faker("en_US")
 
         USER_COUNT = 50
@@ -190,6 +194,7 @@ class Command(BaseCommand):
                                 4,
                             )
                         ),
+                        
                     )
                 )
 

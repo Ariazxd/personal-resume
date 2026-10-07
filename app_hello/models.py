@@ -8,6 +8,7 @@ class Profile(models.Model):
     job_title = models.CharField(max_length=50,null=True)
     description = models.TextField(null=True)
     intrests = models.TextField(null=True)
+    location = models.CharField(null=True,max_length=70)
 
 
 class Experience(models.Model):
