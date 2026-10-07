@@ -1,0 +1,10 @@
+<form>
+    <input type="text" name="q" value="{{ q }}" />
+    <input type="submit" value="Search" />
+</form>
+
+{% for user in users %}
+{{ user }}
+<br />
+<br />
+{% endfor %}

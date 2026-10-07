@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Resume Directory{% endblock title %}</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+
+{% block css %}
+<style>
+
+/* =========================================================
+   DESIGN TOKENS  (one place to change colors for ALL pages)
+   ========================================================= */
+
+:root {
+    --blue:        #54afe4;
+    --blue-dark:   #3d99cf;
+    --blue-soft:   #edf6fb;   /* tag background            */
+    --blue-text:   #478db5;   /* tag text                  */
+    --dot-off:     #c3def3;   /* skill dot (empty)         */
+    --dot-on:      #79a9ce;   /* skill dot (filled)        */
+
+    --text:        #222222;
+    --text-soft:   #555555;
+    --text-muted:  #999999;
+    --text-body:   #666666;
+
+    --line:        #eeeeee;
+    --line-input:  #dddddd;
+    --page-bg:     #eeeeee;
+    --card-bg:     #ffffff;
+
+    --radius:      3px;
+    --shadow:      1px 1px 2px #dad7d7;
+    --shadow-hover: 0 7px 18px rgba(0, 0, 0, 0.10);
+}
+
+
+/* =========================================================
+   GLOBAL RESET
+   ========================================================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--page-bg);
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    color: var(--text);
+    font-size: 14px;
+    line-height: 26px;
+    padding-bottom: 50px;
+}
+
+button,
+input,
+select {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+
+/* =========================================================
+   SHARED COMPONENTS  (used by BOTH index and resume pages)
+   ========================================================= */
+
+/* white card */
+.card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+/* avatar circle (initials) */
+.avatar {
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--dot-off);
+    color: var(--blue-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+/* job title / blue accent text */
+.position {
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 20px;
+}
+
+.location {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 18px;
+}
+
+/* small blue skill tag */
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    min-height: 26px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 9px;
+    background: var(--blue-soft);
+    color: var(--blue-text);
+    border-radius: var(--radius);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* blue button / link-button */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 41px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: var(--radius);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: 0.2s ease;
+}
+
+.btn-primary {
+    background: var(--blue);
+    color: #ffffff;
+}
+
+.btn-primary:hover {
+    background: var(--blue-dark);
+}
+
+.btn-secondary {
+    background: #f1f1f1;
+    color: var(--text-soft);
+}
+
+.btn-secondary:hover {
+    background: #e5e5e5;
+}
+
+
+/* =========================================================
+   =========================================================
+   INDEX / DIRECTORY PAGE      (<body class="directory-page">)
+   =========================================================
+   ========================================================= */
+
+.directory-page .container {
+    width: min(1180px, calc(100% - 40px));
+    margin: 50px auto;
+}
+
+.directory-page .directory {
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 25px;
+    align-items: start;
+}
+
+
+/* FILTER PANEL */
+
+.directory-page .filters {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    position: sticky;
+    top: 25px;
+}
+
+.directory-page .filters-header {
+    padding-bottom: 17px;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+}
+
+.directory-page .filters-title {
+    font-size: 21px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.directory-page .filters-subtitle {
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 18px;
+}
+
+.directory-page .filter-group {
+    margin-bottom: 20px;
+}
+
+.directory-page .filter-label {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text-soft);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.directory-page .filter-input,
+.directory-page .filter-select {
+    width: 100%;
+    height: 41px;
+    border: 1px solid var(--line-input);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text);
+    padding: 0 11px;
+    outline: none;
+    font-size: 13px;
+    transition: 0.2s ease;
+}
+
+.directory-page .filter-input::placeholder {
+    color: #aaaaaa;
+}
+
+.directory-page .filter-input:focus,
+.directory-page .filter-select:focus {
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(84, 175, 228, 0.10);
+}
+
+
+/* FILTER SKILLS (checkboxes) */
+
+.directory-page .skills {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.directory-page .skill-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-soft);
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.directory-page .skill-option input {
+    display: none;
+}
+
+.directory-page .skill-checkbox {
+    width: 16px;
+    height: 16px;
+    border: 1px solid #cccccc;
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    position: relative;
+    flex-shrink: 0;
+}
+
+.directory-page .skill-option input:checked + .skill-checkbox {
+    background: var(--blue);
+    border-color: var(--blue);
+}
+
+.directory-page .skill-option input:checked + .skill-checkbox::after {
+    content: "";
+    position: absolute;
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border: solid #ffffff;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+
+/* FILTER BUTTONS */
+
+.directory-page .filter-actions {
+    border-top: 1px solid var(--line);
+    margin-top: 23px;
+    padding-top: 18px;
+}
+
+.directory-page .filter-actions .btn {
+    width: 100%;
+}
+
+.directory-page .filter-actions .btn-secondary {
+    margin-top: 8px;
+}
+
+
+/* RESULTS HEADER */
+
+.directory-page .results-header {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.directory-page .results-title {
+    font-size: 25px;
+    line-height: 1.2;
+    font-weight: 700;
+}
+
+.directory-page .results-count {
+    margin-top: 4px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.directory-page .results-controls {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.directory-page .sort {
+    height: 37px;
+    border: 1px solid var(--line-input);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    padding: 0 10px;
+    color: var(--text-soft);
+    font-size: 12px;
+    outline: none;
+}
+
+.directory-page .view-button {
+    width: 37px;
+    height: 37px;
+    border: 1px solid var(--line-input);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text-muted);
+    font-size: 17px;
+    transition: 0.2s ease;
+}
+
+.directory-page .view-button:hover,
+.directory-page .view-button.active {
+    color: var(--blue);
+    border-color: var(--blue);
+}
+
+
+/* RESUME GRID + CARD */
+
+.directory-page .resume-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.directory-page .resume-grid.list-view {
+    grid-template-columns: 1fr;
+}
+
+.directory-page .resume-card {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 23px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.directory-page .resume-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+}
+
+.directory-page .card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 17px;
+}
+
+.directory-page .avatar {
+    width: 57px;
+    height: 57px;
+    font-size: 19px;
+}
+
+.directory-page .identity {
+    min-width: 0;
+}
+
+.directory-page .name {
+    font-size: 19px;
+    line-height: 24px;
+    font-weight: 700;
+}
+
+.directory-page .description {
+    color: var(--text-body);
+    font-size: 13px;
+    line-height: 21px;
+    margin-bottom: 17px;
+}
+
+.directory-page .tags {
+    margin-bottom: 18px;
+}
+
+.directory-page .card-footer {
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.directory-page .experience {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+.directory-page .view-resume {
+    min-height: 35px;
+    padding: 0 13px;
+    font-size: 11px;
+}
+
+
+/* LIST VIEW */
+
+.directory-page .resume-grid.list-view .resume-card {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 22px;
+}
+
+.directory-page .resume-grid.list-view .card-top,
+.directory-page .resume-grid.list-view .description,
+.directory-page .resume-grid.list-view .tags {
+    margin-bottom: 0;
+}
+
+.directory-page .resume-grid.list-view .card-footer {
+    border-top: 0;
+    padding-top: 0;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+
+/* EMPTY STATE */
+
+.directory-page .empty {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 60px 30px;
+    text-align: center;
+}
+
+.directory-page .empty-icon {
+    color: var(--blue);
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.directory-page .empty-title {
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.directory-page .empty-text {
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+
+/* PAGINATION */
+
+.directory-page .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 25px;
+}
+
+.directory-page .pagination a,
+.directory-page .pagination span {
+    min-width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-input);
+    border-radius: var(--radius);
+    background: var(--card-bg);
+    color: var(--text-soft);
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.directory-page .pagination .active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #ffffff;
+}
+
+
+/* =========================================================
+   =========================================================
+   RESUME DETAIL PAGE          (<body class="resume-page">)
+   =========================================================
+   ========================================================= */
+
+.resume-page .container {
+    max-width: 760px;
+    width: calc(100% - 40px);
+    margin: 50px auto 0;
+}
+
+/* back link above the card */
+.resume-page .back-link {
+    display: inline-block;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.resume-page .back-link:hover {
+    color: var(--blue);
+}
+
+/* the white sheet */
+.resume-page .sheet {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 40px;
+}
+
+
+/* HEADER */
+
+.resume-page .header {
+    margin-bottom: 35px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+}
+
+.resume-page .header-top {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+}
+
+.resume-page .avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 24px;
+}
+
+.resume-page .full-name {
+    font-size: 36px;
+    line-height: 42px;
+    text-transform: uppercase;
+}
+
+.resume-page .first-name {
+    font-weight: 700;
+}
+
+.resume-page .last-name {
+    font-weight: 300;
+}
+
+.resume-page .header .position {
+    font-size: 14px;
+}
+
+.resume-page .contact-info {
+    margin-bottom: 14px;
+    color: var(--text-body);
+}
+
+.resume-page .contact-label {
+    color: var(--text-muted);
+    font-weight: 300;
+}
+
+.resume-page .separator {
+    height: 10px;
+    display: inline-block;
+    border-left: 2px solid var(--text-muted);
+    margin: 0 10px;
+}
+
+.resume-page .about {
+    color: var(--text-body);
+    line-height: 22px;
+}
+
+
+/* SECTIONS */
+
+.resume-page .details {
+    line-height: 20px;
+}
+
+.resume-page .section {
+    margin-bottom: 40px;
+}
+
+.resume-page .section:last-child {
+    margin-bottom: 0;
+}
+
+.resume-page .section__title {
+    letter-spacing: 2px;
+    color: var(--blue);
+    font-weight: 700;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+}
+
+.resume-page .section__list-item {
+    margin-bottom: 30px;
+}
+
+.resume-page .section__list-item:last-child {
+    margin-bottom: 0;
+}
+
+/* experience / education row: left column + right column */
+.resume-page .row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.resume-page .row .left {
+    flex: 0 0 55%;
+}
+
+.resume-page .row .right {
+    flex: 1;
+    text-align: right;
+}
+
+.resume-page .details .name {
+    font-weight: 700;
+}
+
+.resume-page .details .addr,
+.resume-page .details .duration {
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.resume-page .details .desc,
+.resume-page .details .text {
+    color: var(--text-body);
+}
+
+
+/* SKILLS (dots) */
+
+.resume-page .skills {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.resume-page .skills__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.resume-page .dots {
+    display: flex;
+    gap: 3px;
+}
+
+.resume-page .dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--dot-off);
+}
+
+.resume-page .dot.on {
+    background: var(--dot-on);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 950px) {
+
+    .directory-page .directory {
+        grid-template-columns: 1fr;
+    }
+
+    .directory-page .filters {
+        position: static;
+    }
+
+    .directory-page .resume-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .directory-page .resume-grid.list-view .resume-card {
+        display: block;
+    }
+
+    .directory-page .resume-grid.list-view .card-top {
+        margin-bottom: 17px;
+    }
+
+    .directory-page .resume-grid.list-view .description {
+        margin-bottom: 17px;
+    }
+
+    .directory-page .resume-grid.list-view .tags {
+        margin-bottom: 18px;
+    }
+
+    .directory-page .resume-grid.list-view .card-footer {
+        border-top: 1px solid var(--line);
+        padding-top: 14px;
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+@media (max-width: 600px) {
+
+    body {
+        font-size: 13px;
+    }
+
+    /* index */
+    .directory-page .container {
+        width: calc(100% - 20px);
+        margin: 20px auto;
+    }
+
+    .directory-page .results-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .directory-page .results-controls {
+        width: 100%;
+    }
+
+    .directory-page .sort {
+        flex: 1;
+    }
+
+    .directory-page .resume-card {
+        padding: 19px;
+    }
+
+    .directory-page .filters {
+        padding: 20px;
+    }
+
+    .directory-page .results-title {
+        font-size: 22px;
+    }
+
+    /* resume */
+    .resume-page .container {
+        width: calc(100% - 20px);
+        margin-top: 20px;
+    }
+
+    .resume-page .sheet {
+        padding: 25px 20px;
+    }
+
+    .resume-page .header-top {
+        gap: 14px;
+    }
+
+    .resume-page .avatar {
+        width: 56px;
+        height: 56px;
+        font-size: 19px;
+    }
+
+    .resume-page .full-name {
+        font-size: 26px;
+        line-height: 32px;
+    }
+
+    .resume-page .contact-info {
+        line-height: 22px;
+    }
+
+    .resume-page .row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .resume-page .row .left,
+    .resume-page .row .right {
+        flex: none;
+        width: 100%;
+        text-align: left;
+    }
+
+    .resume-page .dot {
+        width: 17px;
+        height: 17px;
+    }
+}
+
+</style>
+{% endblock css %}
+
+</head>
+
+<body class="{% block body_class %}{% endblock body_class %}">
+
+{% block content %}{% endblock content %}
+
+{% block js %}{% endblock js %}
+
+</body>
+</html>

@@ -1,7 +1,815 @@
-hello
-{{name}}
-{{now}}
+{% extends "base.html" %}
 
-{% for n in news %}
-{{n.title}}
-{% endfor %}
+{% block body_class %}directory-page{% endblock body_class %}
+
+{% block css %}
+{{ block.super }}
+<style>
+.directory-page .pagination a:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+}
+.directory-page .pagination .disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+</style>
+{% endblock css %}
+
+{% block content %}
+
+
+
+<!-- =========================================================
+     MAIN CONTAINER
+     ========================================================= -->
+
+<div class="container">
+
+
+    <div class="directory">
+
+
+        <!-- =====================================================
+             LEFT FILTER SIDEBAR
+             ===================================================== -->
+
+        <aside class="filters">
+
+
+            <div class="filters-header">
+
+                <div class="filters-title">
+                    Resume Directory
+                </div>
+
+                <div class="filters-subtitle">
+                    Search and filter available resumes.
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FILTER FORM
+                 ================================================= -->
+
+            <form
+                method="GET"
+                id="resumeFilterForm"
+            >
+
+
+                <!-- SEARCH -->
+
+                <div class="filter-group">
+
+                    <label
+                        class="filter-label"
+                        for="search"
+                    >
+                        Search
+                    </label>
+
+                    <input
+                        class="filter-input"
+                        type="text"
+                        id="search"
+                        name="q"
+                        value = {{ q }}
+                        placeholder="Name or job title..."
+                        
+                        
+                    >
+
+                </div>
+
+
+                <!-- LOCATION -->
+
+                <div class="filter-group">
+
+                    <label
+                        class="filter-label"
+                        for="location"
+                    >
+                        Location
+                    </label>
+
+                    <input
+                        class="filter-input"
+                        type="text"
+                        id="location"
+                        name="location"
+                        placeholder="City or country..."
+                        value="{{ request.GET.location|default:'' }}"
+                    >
+
+                </div>
+
+
+                <!-- EXPERIENCE -->
+
+                <div class="filter-group">
+
+                    <label
+                        class="filter-label"
+                        for="experience"
+                    >
+                        Experience
+                    </label>
+
+                    <select
+                        class="filter-select"
+                        id="experience"
+                        name="experience"
+                    >
+
+                        <option value="">
+                            All levels
+                        </option>
+
+                        <option
+                            value="junior"
+                            {% if request.GET.experience == "junior" %}
+                                selected
+                            {% endif %}
+                        >
+                            Junior
+                        </option>
+
+                        <option
+                            value="mid"
+                            {% if request.GET.experience == "mid" %}
+                                selected
+                            {% endif %}
+                        >
+                            Mid-Level
+                        </option>
+
+                        <option
+                            value="senior"
+                            {% if request.GET.experience == "senior" %}
+                                selected
+                            {% endif %}
+                        >
+                            Senior
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- SKILLS -->
+
+                <div class="filter-group">
+
+                    <label class="filter-label">
+                        Skills
+                    </label>
+
+
+                    <div class="skills">
+
+                        {% for skill in skills %}
+
+                        <label class="skill-option">
+
+                            <input
+                                type="checkbox"
+                                name="skills"
+                                value="{{ skill }}"
+                            >
+
+                            <span class="skill-checkbox"></span>
+
+                            <span>
+                                {{ skill }}
+                            </span>
+
+                        </label>
+
+                        {% empty %}
+
+                        <span
+                            style="
+                                color:#999;
+                                font-size:12px;
+                            "
+                        >
+                            No skills available
+                        </span>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- BUTTONS -->
+
+                <div class="filter-actions">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary"
+                    >
+                        Apply Filters
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        id="resetFilters"
+                    >
+                        Reset Filters
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </aside>
+
+
+        <!-- =====================================================
+             RIGHT RESULTS
+             ===================================================== -->
+
+        <main>
+
+
+            <!-- =================================================
+                 RESULTS HEADER
+                 ================================================= -->
+
+            <div class="results-header">
+
+
+                <div>
+
+                    <div class="results-title">
+                        Resumes
+                    </div>
+
+                    <div class="results-count">
+                        {{ page_obj.paginator.count }}
+                        resume{{ page_obj.paginator.count|pluralize }}
+                        found
+                    </div>
+
+                </div>
+
+
+                <div class="results-controls">
+
+
+                    <select
+                        class="sort"
+                        id="sortResumes"
+                    >
+
+                        <option value="default">
+                            Sort
+                        </option>
+
+                        <option value="name">
+                            Name
+                        </option>
+
+                        <option value="job">
+                            Job Title
+                        </option>
+
+                    </select>
+
+
+                    <button
+                        type="button"
+                        class="view-button active"
+                        data-view="grid"
+                        title="Grid view"
+                    >
+                        ▦
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="view-button"
+                        data-view="list"
+                        title="List view"
+                    >
+                        ☰
+                    </button>
+
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =================================================
+                 RESUME LIST
+                 ================================================= -->
+
+            {% if page_obj %}
+
+
+            <div
+                class="resume-grid"
+                id="resumeGrid"
+            >
+
+
+                {% for user in page_obj %}
+
+                <article
+                    class="resume-card"
+                    data-name="{{ user.first_name }} {{ user.last_name }}"
+                    data-job="{{ user.profile.job_title|default:'' }}"
+                >
+               
+
+                    <!-- CARD TOP -->
+
+                    <div class="card-top">
+
+
+                        <div class="avatar">
+
+                            {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+
+                        </div>
+
+
+                        <div class="identity">
+
+
+                            <div class="name">
+
+                                {{ user.first_name }}
+                                {{ user.last_name }}
+
+                            </div>
+
+
+                            {% if user.profile.job_title %}
+
+                            <div class="position">
+
+                                {{ user.profile.job_title }}
+
+                            </div>
+
+                            {% endif %}
+
+
+                            {% if user.profile.location %}
+
+                            <div class="location">
+
+                                {{ user.profile.location }}
+
+                            </div>
+
+                            {% endif %}
+
+
+                        </div>
+
+
+                    </div>
+
+
+                    <!-- DESCRIPTION -->
+
+                    <div class="description">
+
+
+                        {% if user.profile.description %}
+
+                            {{ user.profile.description|truncatewords:25 }}
+
+                        {% elif user.profile.intrests %}
+
+                            {{ user.profile.intrests|truncatewords:25 }}
+
+                        {% elif user.experience_set.exists %}
+
+                            {{ user.experience_set.first.job_description|truncatewords:25 }}
+
+                        {% else %}
+
+                            Professional resume available for review.
+
+                        {% endif %}
+
+
+                    </div>
+
+
+                    <!-- SKILL TAGS -->
+
+                    <div class="tags">
+
+
+                        {% for skill in user.skill_set.all|slice:":5" %}
+
+                            <span class="tag">
+                                {{ skill.title }}
+                            </span>
+
+                        {% empty %}
+
+                            <span class="tag">
+                                No skills listed
+                            </span>
+
+                        {% endfor %}
+
+
+                    </div>
+
+
+                    <!-- FOOTER -->
+
+                    <div class="card-footer">
+
+
+                        <div class="experience">
+
+                            {% if user.experience_set.exists %}
+
+                                {{ user.experience_set.count }}
+                                experience
+                                {% if user.experience_set.count != 1 %}
+                                    entries
+                                {% else %}
+                                    entry
+                                {% endif %}
+
+                            {% else %}
+
+                                No experience
+
+                            {% endif %}
+
+                        </div>
+
+
+                        <a
+                            href="{% url 'resume' user.id %}"
+                            class="btn btn-primary view-resume"
+                        >
+                            View Resume
+                        </a>
+
+
+                    </div>
+
+
+                </article>
+
+
+                {% endfor %}
+
+
+            </div>
+
+
+            {% else %}
+
+
+            <!-- =================================================
+                 EMPTY STATE
+                 ================================================= -->
+
+            <div class="empty">
+
+                <div class="empty-icon">
+                    ♧
+                </div>
+
+                <div class="empty-title">
+                    No Resumes Found
+                </div>
+
+                <div class="empty-text">
+                    Try changing your search or filter criteria.
+                </div>
+
+            </div>
+
+
+            {% endif %}
+
+
+            <!-- =================================================
+                 PAGINATION
+                 ================================================= -->
+
+            {% if page_obj.has_other_pages %}
+
+            <nav class="pagination" aria-label="Pagination">
+
+                <!-- FIRST PAGE -->
+                {% if page_obj.has_previous %}
+                    <a href="?page=1" title="First page">&laquo;</a>
+                    <a href="?page={{ page_obj.previous_page_number }}" title="Previous page">&lsaquo;</a>
+                {% else %}
+                    <span class="disabled">&laquo;</span>
+                    <span class="disabled">&lsaquo;</span>
+                {% endif %}
+
+                <!-- 5 PAGE NUMBERS AROUND THE CURRENT PAGE -->
+                {% for page_number in page_obj.paginator.page_range %}
+                    {% if page_number >= page_obj.number|add:'-2' and page_number <= page_obj.number|add:'2' or page_obj.number <= 2 and page_number <= 5 or page_obj.number >= page_obj.paginator.num_pages|add:'-1' and page_number >= page_obj.paginator.num_pages|add:'-4' %}
+                        {% if page_number == page_obj.number %}
+                            <span class="active">{{ page_number }}</span>
+                        {% else %}
+                            <a href="?page={{ page_number }}">{{ page_number }}</a>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+
+                <!-- LAST PAGE -->
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}" title="Next page">&rsaquo;</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}" title="Last page">&raquo;</a>
+                {% else %}
+                    <span class="disabled">&rsaquo;</span>
+                    <span class="disabled">&raquo;</span>
+                {% endif %}
+
+            </nav>
+
+            {% endif %}
+
+
+        </main>
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     JAVASCRIPT
+     ========================================================= -->
+
+{% endblock content  %}
+{% block js %}
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    /* =====================================================
+       ELEMENTS
+       ===================================================== */
+
+    const form =
+        document.getElementById("resumeFilterForm");
+
+    const resetButton =
+        document.getElementById("resetFilters");
+
+    const grid =
+        document.getElementById("resumeGrid");
+
+    const sortSelect =
+        document.getElementById("sortResumes");
+
+    const viewButtons =
+        document.querySelectorAll(".view-button");
+
+
+    /* =====================================================
+       RESET FILTERS
+       ===================================================== */
+
+    if (resetButton) {
+
+        resetButton.addEventListener(
+            "click",
+            function () {
+
+                window.location.href =
+                    window.location.pathname;
+
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       GRID / LIST VIEW
+       ===================================================== */
+
+    viewButtons.forEach(function (button) {
+
+
+        button.addEventListener(
+            "click",
+            function () {
+
+
+                if (!grid) {
+                    return;
+                }
+
+
+                const view =
+                    button.dataset.view;
+
+
+                viewButtons.forEach(
+                    function (item) {
+
+                        item.classList.remove("active");
+
+                    }
+                );
+
+
+                button.classList.add("active");
+
+
+                if (view === "list") {
+
+                    grid.classList.add("list-view");
+
+                    localStorage.setItem(
+                        "resumeView",
+                        "list"
+                    );
+
+                }
+
+                else {
+
+                    grid.classList.remove("list-view");
+
+                    localStorage.setItem(
+                        "resumeView",
+                        "grid"
+                    );
+
+                }
+
+
+            }
+        );
+
+
+    });
+
+
+    /* =====================================================
+       RESTORE PREVIOUS VIEW
+       ===================================================== */
+
+    const savedView =
+        localStorage.getItem("resumeView");
+
+
+    if (savedView === "list") {
+
+        const listButton =
+            document.querySelector(
+                '[data-view="list"]'
+            );
+
+
+        if (listButton) {
+
+            listButton.click();
+
+        }
+
+    }
+
+
+    /* =====================================================
+       SORT
+       ===================================================== */
+
+    if (sortSelect && grid) {
+
+
+        sortSelect.addEventListener(
+            "change",
+            function () {
+
+
+                const cards =
+                    Array.from(
+                        grid.querySelectorAll(
+                            ".resume-card"
+                        )
+                    );
+
+
+                const type =
+                    sortSelect.value;
+
+
+                if (type === "default") {
+
+                    return;
+
+                }
+
+
+                cards.sort(
+                    function (a, b) {
+
+
+                        if (type === "name") {
+
+                            return a.dataset.name
+                                .localeCompare(
+                                    b.dataset.name
+                                );
+
+                        }
+
+
+                        if (type === "job") {
+
+                            return a.dataset.job
+                                .localeCompare(
+                                    b.dataset.job
+                                );
+
+                        }
+
+
+                        return 0;
+
+                    }
+                );
+
+
+                cards.forEach(
+                    function (card) {
+
+                        grid.appendChild(card);
+
+                    }
+                );
+
+
+            }
+        );
+
+
+    }
+
+
+    /* =====================================================
+       ENTER KEY SEARCH
+       ===================================================== */
+
+    const searchInput =
+        document.getElementById("search");
+
+
+    if (searchInput && form) {
+
+
+        searchInput.addEventListener(
+            "keydown",
+            function (event) {
+
+
+                if (event.key === "Enter") {
+
+                    event.preventDefault();
+
+                    form.submit();
+
+                }
+
+
+            }
+        );
+
+
+    }
+
+
+});
+
+</script>
+{% endblock js %}
