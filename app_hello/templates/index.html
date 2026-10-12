@@ -76,7 +76,7 @@
                         type="text"
                         id="search"
                         name="q"
-                        value = {{ q }}
+                        value="{{ q }}"
                         placeholder="Name or job title..."
                         
                         
@@ -180,6 +180,7 @@
                                 type="checkbox"
                                 name="skills"
                                 value="{{ skill }}"
+                                {% if skill in selected_skills %}checked{% endif %}
                             >
 
                             <span class="skill-checkbox"></span>
@@ -521,8 +522,8 @@
 
                 <!-- FIRST PAGE -->
                 {% if page_obj.has_previous %}
-                    <a href="?page=1" title="First page">&laquo;</a>
-                    <a href="?page={{ page_obj.previous_page_number }}" title="Previous page">&lsaquo;</a>
+                    <a href="?page=1{% if querystring %}&{{ querystring }}{% endif %}" title="First page">&laquo;</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}" title="Previous page">&lsaquo;</a>
                 {% else %}
                     <span class="disabled">&laquo;</span>
                     <span class="disabled">&lsaquo;</span>
@@ -534,15 +535,15 @@
                         {% if page_number == page_obj.number %}
                             <span class="active">{{ page_number }}</span>
                         {% else %}
-                            <a href="?page={{ page_number }}">{{ page_number }}</a>
+                            <a href="?page={{ page_number }}{% if querystring %}&{{ querystring }}{% endif %}">{{ page_number }}</a>
                         {% endif %}
                     {% endif %}
                 {% endfor %}
 
                 <!-- LAST PAGE -->
                 {% if page_obj.has_next %}
-                    <a href="?page={{ page_obj.next_page_number }}" title="Next page">&rsaquo;</a>
-                    <a href="?page={{ page_obj.paginator.num_pages }}" title="Last page">&raquo;</a>
+                    <a href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}" title="Next page">&rsaquo;</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if querystring %}&{{ querystring }}{% endif %}" title="Last page">&raquo;</a>
                 {% else %}
                     <span class="disabled">&rsaquo;</span>
                     <span class="disabled">&raquo;</span>
