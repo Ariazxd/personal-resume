@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="filters-header">
+
+                <div class="filters-title">
+                    Resume Directory
+                </div>
+
+                <div class="filters-subtitle">
+                    edit your profile and add your skills
+                </div>
+                  <form action="" method="post">
+                    {{ user_form }}
+                    {{ profile_form }}
+
+                    <hr />
+                    {{ experience_formset.management_form }}
+
+                    {% for form in experience_formset %}
+                        experience #{{ forloop.counter}}
+                        {{ form.as_p}}
+                    {% endfor %}
+
+                    {% csrf_token %}
+                    <input type="submit">
+                  </form>
+            </div>
+
+{%endblock content%}

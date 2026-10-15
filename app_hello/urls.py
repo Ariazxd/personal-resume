@@ -21,5 +21,6 @@ from app_hello import views
 urlpatterns = [
     path('resume/<int:id>', views.resume,name='resume'),
     path('',views.index,name='index'),
-    path('my-form/',views.my_form)
+    path('my-form/',views.my_form),
+    path('resume/edit', views.resume_edit,name='resume-edit'),
 ]

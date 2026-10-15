@@ -865,12 +865,21 @@ a {
     }
 }
 
+    .nav {
+        background-color: gray;
+        padding: 10px 30px;
+        display: flex;
+        justify-content: space-between;
+    }
+
 </style>
 {% endblock css %}
 
 </head>
 
 <body class="{% block body_class %}{% endblock body_class %}">
+
+{% include "components/nav.html" %}
 
 {% block content %}{% endblock content %}
 

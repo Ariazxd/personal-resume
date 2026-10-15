@@ -1,10 +1,18 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from django.db.models import Q
-from app_hello.models import Profile
 
-from .models import Skill
+from .models import Profile, Skill
+from .forms import (
+    UserForm,
+    ProfileForm,
+    ExperienceFormSet,
+    EducationFormSet,
+    ProjectFormSet,
+    SkillFormSet,
+)
 
 
 def resume(request, id):
@@ -36,8 +44,9 @@ def index(request):
         users = users.filter(profile__location__icontains=location)
 
     # ---------- skills: the user must have ALL the selected skills ----------
+    # Skill belongs to Profile, so the lookup goes through profile
     for skill in selected_skills:
-        users = users.filter(skill__title__iexact=skill)
+        users = users.filter(profile__skill__title__iexact=skill)
 
     users = users.distinct()
 
@@ -50,7 +59,7 @@ def index(request):
     )
 
     # ---------- pagination ----------
-    paginator = Paginator(users.distinct(), ITEM_PER_PAGE)
+    paginator = Paginator(users, ITEM_PER_PAGE)
     page_obj = paginator.get_page(request.GET.get('page'))
 
     # keep the filters in the pagination links (everything except "page")
@@ -63,17 +72,63 @@ def index(request):
         'selected_skills': selected_skills,
         'q': q,
         'querystring': params.urlencode(),
-        'locations':Profile.objects.values_list('location',flat=True)
+        'locations': (
+            Profile.objects.exclude(location__isnull=True)
+            .exclude(location='')
+            .values_list('location', flat=True)
+            .distinct()
+        ),
     }
     return render(request, 'index.html', context)
 
+
 def my_form(request):
-    q = request.GET.get('q','')
+    q = request.GET.get('q', '')
     users = User.objects.all()
     if q:
         users = User.objects.filter(first_name__icontains=q)
     context = {
-        'users':users,
-        'q':q
+        'users': users,
+        'q': q
     }
-    return render(request,'my_form.html',context)
+    return render(request, 'my_form.html', context)
+
+
+@login_required
+def resume_edit(request):
+    profile, _ = Profile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, instance=profile)
+        experience_formset = ExperienceFormSet(request.POST, instance=profile)
+        education_formset = EducationFormSet(request.POST, instance=profile)
+        project_formset = ProjectFormSet(request.POST, instance=profile)
+        skill_formset = SkillFormSet(request.POST, instance=profile)
+
+        all_forms = [
+            user_form, profile_form, experience_formset,
+            education_formset, project_formset, skill_formset,
+        ]
+        # a list (not a generator) so every form is validated and shows its errors
+        if all([f.is_valid() for f in all_forms]):
+            for f in all_forms:
+                f.save()
+            return redirect("resume-edit")
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = ProfileForm(instance=profile)
+        experience_formset = ExperienceFormSet(instance=profile)
+        education_formset = EducationFormSet(instance=profile)
+        project_formset = ProjectFormSet(instance=profile)
+        skill_formset = SkillFormSet(instance=profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form,
+        'experience_formset': experience_formset,
+        'education_formset': education_formset,
+        'project_formset': project_formset,
+        'skill_formset': skill_formset,
+    }
+    return render(request, 'resume-edit.html', context)

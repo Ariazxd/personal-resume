@@ -5,6 +5,7 @@
 {% block body_class %}resume-page{% endblock body_class %}
 
 {% block content %}
+
 <div class="container">
 
   <a class="back-link" href="/">&larr; Back to directory</a>
@@ -61,11 +62,11 @@
     <div class="details">
 
       <!-- EXPERIENCE -->
-      {% if user.experience_set.exists %}
+      {% if user.profile.experience_set.exists %}
       <div class="section">
         <div class="section__title">Experience</div>
 
-        {% for ex in user.experience_set.all %}
+        {% for ex in user.profile.experience_set.all %}
         <div class="section__list-item">
           <div class="row">
             <div class="left">
@@ -85,11 +86,11 @@
 
 
       <!-- EDUCATION -->
-      {% if user.education_set.exists %}
+      {% if user.profile.education_set.exists %}
       <div class="section">
         <div class="section__title">Education</div>
 
-        {% for edu in user.education_set.all %}
+        {% for edu in user.profile.education_set.all %}
         <div class="section__list-item">
           <div class="row">
             <div class="left">
@@ -98,7 +99,7 @@
               <div class="duration">{{ edu.date_range }}</div>
             </div>
             <div class="right">
-              <div class="name">{{ edu.pertified_degree }}</div>
+              <div class="name">{{ edu.pretified_degree }}</div>
               <div class="desc">{{ edu.study_description }}</div>
             </div>
           </div>
@@ -109,11 +110,11 @@
 
 
       <!-- PROJECTS -->
-      {% if user.project_set.exists %}
+      {% if user.profile.project_set.exists %}
       <div class="section">
         <div class="section__title">Projects</div>
 
-        {% for project in user.project_set.all %}
+        {% for project in user.profile.project_set.all %}
         <div class="section__list-item">
           <div class="name">{{ project.title }}</div>
           <div class="text">{{ project.description }}</div>
@@ -124,12 +125,12 @@
 
 
       <!-- SKILLS -->
-      {% if user.skill_set.exists %}
+      {% if user.profile.skill_set.exists %}
       <div class="section">
         <div class="section__title">Skills</div>
 
         <div class="skills">
-          {% for skill in user.skill_set.all %}
+          {% for skill in user.profile.skill_set.all %}
           <div class="skills__item">
             <div class="name">{{ skill.title }}</div>
 

@@ -35,7 +35,7 @@
              ===================================================== -->
 
         <aside class="filters">
-
+        
 
             <div class="filters-header">
 
@@ -402,9 +402,9 @@
 
                             {{ user.profile.intrests|truncatewords:25 }}
 
-                        {% elif user.experience_set.exists %}
+                        {% elif user.profile.experience_set.exists %}
 
-                            {{ user.experience_set.first.job_description|truncatewords:25 }}
+                            {{ user.profile.experience_set.first.job_description|truncatewords:25 }}
 
                         {% else %}
 
@@ -421,7 +421,7 @@
                     <div class="tags">
 
 
-                        {% for skill in user.skill_set.all|slice:":5" %}
+                        {% for skill in user.profile.skill_set.all|slice:":5" %}
 
                             <span class="tag">
                                 {{ skill.title }}
@@ -446,11 +446,11 @@
 
                         <div class="experience">
 
-                            {% if user.experience_set.exists %}
+                            {% if user.profile.experience_set.exists %}
 
-                                {{ user.experience_set.count }}
+                                {{ user.profile.experience_set.count }}
                                 experience
-                                {% if user.experience_set.count != 1 %}
+                                {% if user.profile.experience_set.count != 1 %}
                                     entries
                                 {% else %}
                                     entry
